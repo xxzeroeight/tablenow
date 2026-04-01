@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -89,8 +90,8 @@ public class SecurityConfig
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             // 5. HTTP 요청 권한 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/reissue").permitAll()
-                    .requestMatchers("/api/auth/logout").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/signup", "/api/auth/reissue").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                     .anyRequest().authenticated()
             );
 
