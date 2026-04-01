@@ -1,7 +1,7 @@
 CREATE TABLE refresh_tokens
 (
     id          UUID         PRIMARY KEY NOT NULL,
-    token       TEXT                     NOT NULL,
+    token       TEXT                     NOT NULL UNIQUE,
     user_id     UUID                     NOT NULL UNIQUE,
     created_at  TIMESTAMPTZ              NOT NULL DEFAULT NOW(),
 
