@@ -51,12 +51,14 @@ public class AuthServiceImpl implements AuthService
         String accessToken = jwtProvider.createAccessToken(user);
         String refreshToken = jwtProvider.createRefreshToken(user);
 
-        refreshTokenRepository.deleteByUser(user);
-        refreshTokenRepository.flush();
-        refreshTokenRepository.save(RefreshToken.builder()
-                .token(hashToken(refreshToken))
-                .user(user)
-                .build());
+        refreshTokenRepository.findByUser(user)
+                .ifPresentOrElse(
+                        existingToken -> existingToken.update(refreshToken),
+                        () -> refreshTokenRepository.save(RefreshToken.builder()
+                                        .token(refreshToken)
+                                        .user(user)
+                                        .build())
+                );
 
         return new TokenResponse(accessToken, refreshToken);
     }
