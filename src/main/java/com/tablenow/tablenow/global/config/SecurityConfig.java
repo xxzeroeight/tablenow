@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -84,7 +85,9 @@ public class SecurityConfig
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 3. Http Basic Authentication 설정
             .httpBasic(AbstractHttpConfigurer::disable)
-            // 4. HTTP 요청 권한 설정
+            // 4. JwtFilter 설정
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            // 5. HTTP 요청 권한 설정
             .authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()
             );
