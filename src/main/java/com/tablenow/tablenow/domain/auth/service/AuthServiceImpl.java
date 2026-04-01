@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService
                 .ifPresentOrElse(
                         existingToken -> existingToken.update(refreshToken),
                         () -> refreshTokenRepository.save(RefreshToken.builder()
-                                        .token(refreshToken)
+                                        .token(hashToken(refreshToken))
                                         .user(user)
                                         .build())
                 );
