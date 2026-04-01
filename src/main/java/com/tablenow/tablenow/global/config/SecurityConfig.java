@@ -89,7 +89,9 @@ public class SecurityConfig
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             // 5. HTTP 요청 권한 설정
             .authorizeHttpRequests(auth -> auth
-                    .anyRequest().permitAll()
+                    .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/reissue").permitAll()
+                    .requestMatchers("/api/auth/logout").authenticated()
+                    .anyRequest().authenticated()
             );
 
         return http.build();
