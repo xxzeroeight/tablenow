@@ -1,0 +1,53 @@
+package com.tablenow.tablenow.global.logging;
+
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+@Slf4j
+public class LoggingAspect
+{
+    @Around("execution(* com.tablenow.tablenow.domain..controller..*(..))")
+    public Object logController(ProceedingJoinPoint joinPoint) throws Throwable {
+        String method = joinPoint.getSignature().toShortString();
+
+        log.info("[REQUEST] {}", method);
+
+        try {
+            Object result = joinPoint.proceed();
+
+            if (result instanceof ResponseEntity<?> response) {
+                log.info("[RESPONSE] {} status={}", method, response.getStatusCode());
+            } else {
+                log.info("[RESPONSE] {}", method);
+            }
+
+            return result;
+        } catch (Exception e) {
+            log.warn("[CONTROLLER FAIL] {} - {}", method, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Around("execution(* com.tablenow.tablenow.domain..service..*(..))")
+    public Object logService(ProceedingJoinPoint joinPoint) throws Throwable {
+        String method = joinPoint.getSignature().toShortString();
+        long start = System.currentTimeMillis();
+
+        try {
+            Object result = joinPoint.proceed();
+            long elapsed = System.currentTimeMillis() - start;
+
+            log.debug("[SERVICE] {} - {}ms", method, elapsed);
+            return result;
+        } catch (Exception e) {
+            log.warn("[SERVICE FAIL] {} - {}", method, e.getMessage());
+            throw e;
+        }
+    }
+}
