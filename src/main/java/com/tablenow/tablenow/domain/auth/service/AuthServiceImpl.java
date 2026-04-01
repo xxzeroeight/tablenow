@@ -14,6 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -25,6 +29,15 @@ public class AuthServiceImpl implements AuthService
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * 이메일, 비밀번호로 인증 후 Access/Refresh Token을 발급.
+     * <p>
+     * 기존 Refresh Token은 삭제 후 새로 저장 (DB에는 해시값으로 저장)
+     *
+     * @param loginRequest 이메일, 비밀번호
+     * @return 발급된 {@link TokenResponse}
+     * @throws IllegalArgumentException 이메일 또는 비밀번호가 일치하지 않을 때
+     */
     @Transactional
     @Override
     public TokenResponse login(LoginRequest loginRequest) {
@@ -41,17 +54,26 @@ public class AuthServiceImpl implements AuthService
         refreshTokenRepository.deleteByUser(user);
         refreshTokenRepository.flush();
         refreshTokenRepository.save(RefreshToken.builder()
-                .token(refreshToken)
+                .token(hashToken(refreshToken))
                 .user(user)
                 .build());
 
         return new TokenResponse(accessToken, refreshToken);
     }
 
+    /**
+     * Refresh Token을 검증하고 Access/Refresh Token을 재발급.
+     * <p>
+     * Refresh Token은 갱신 (rotate).
+     *
+     * @param reissueRequest 재발급에 사용할 Refresh Token
+     * @return 재발급된 {@link TokenResponse}
+     * @throws IllegalArgumentException 유효하지 않은 Refresh Token이거나 사용자가 없을 때
+     */
     @Transactional
     @Override
     public TokenResponse reissue(ReissueRequest reissueRequest) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(reissueRequest.refreshToken())
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(hashToken(reissueRequest.refreshToken()))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
         String userId = jwtProvider.getSubject(reissueRequest.refreshToken());
@@ -61,11 +83,19 @@ public class AuthServiceImpl implements AuthService
         String newAccessToken = jwtProvider.createAccessToken(user);
         String newRefreshToken = jwtProvider.createRefreshToken(user);
 
-        refreshToken.update(newRefreshToken);
+        refreshToken.update(hashToken(newRefreshToken));
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
+    /**
+     * 신규 사용자를 등록.
+     * <p>
+     * 이메일 중복 시 예외 발생. 비밀번호는 BCrypt로 암호화하여 저장.
+     *
+     * @param signupRequest 이름, 이메일, 비밀번호, 닉네임, 전화번호
+     * @throws IllegalArgumentException 이미 사용 중인 이메일일 때
+     */
     @Transactional
     @Override
     public void signup(SignupRequest signupRequest) {
@@ -84,6 +114,12 @@ public class AuthServiceImpl implements AuthService
         userRepository.save(user);
     }
 
+    /**
+     * 해당 사용자의 Refresh Token을 삭제해 로그아웃 처리.
+     *
+     * @param userId 로그아웃할 사용자 ID
+     * @throws IllegalArgumentException 사용자가 존재하지 않을 때
+     */
     @Transactional
     @Override
     public void logout(UUID userId) {
@@ -91,5 +127,22 @@ public class AuthServiceImpl implements AuthService
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
 
         refreshTokenRepository.deleteByUser(user);
+    }
+
+    /**
+     * 토큰을 SHA-256으로 해싱해 반환.
+     *
+     * @param token 해싱할 토큰 문자열
+     * @return 16진수 문자열로 인코딩된 해시값
+     */
+    private String hashToken(String token) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(token.getBytes(StandardCharsets.UTF_8));
+
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
+        }
     }
 }
