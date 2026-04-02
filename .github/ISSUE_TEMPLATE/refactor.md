@@ -6,7 +6,8 @@ labels: refactoring
 assignees: xxzeroeight
 ---
 
-## 리팩토링 대상
+## 대상
+<!-- 리팩토링할 클래스, 메서드, 패키지 등 -->
 
 ## 현재 문제점
 
