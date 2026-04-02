@@ -7,6 +7,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -100,8 +104,37 @@ public class SecurityConfig
             .exceptionHandling(exception -> exception
                     .authenticationEntryPoint((req, resp, e) ->
                             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                    .accessDeniedHandler((req, resp, e) ->
+                            resp.sendError(HttpServletResponse.SC_FORBIDDEN))
             );
 
         return http.build();
+    }
+
+    /**
+     * 역할 계층을 정의하는 {@link RoleHierarchy} 빈 등록.
+     * <p>
+     * ADMIN > OWNER > USER 순으로 상위 역할이 하위 역할의 권한을 포함.
+     *
+     * @return {@link RoleHierarchyImpl}
+     */
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_OWNER > ROLE_USER");
+    }
+
+    /**
+     * 역할 계층이 적용된 {@link MethodSecurityExpressionHandler} 빈 등록.
+     * <p>
+     * {@code @PreAuthorize} 등 메서드 수준 보안 표현식에서 계층 구조를 인식하기 위해 필요.
+     *
+     * @param roleHierarchy 적용할 {@link RoleHierarchy}
+     * @return {@link DefaultMethodSecurityExpressionHandler}
+     */
+    @Bean
+    public MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+        return handler;
     }
 }
