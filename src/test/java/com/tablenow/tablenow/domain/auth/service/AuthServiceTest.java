@@ -5,8 +5,12 @@ import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.domain.auth.entity.RefreshToken;
+import com.tablenow.tablenow.domain.auth.exception.DuplicateEmailException;
+import com.tablenow.tablenow.domain.auth.exception.InvalidCredentialsException;
+import com.tablenow.tablenow.domain.auth.exception.InvalidRefreshTokenException;
 import com.tablenow.tablenow.domain.auth.repository.RefreshTokenRepository;
 import com.tablenow.tablenow.domain.user.entity.User;
+import com.tablenow.tablenow.domain.user.exception.UserNotFoundException;
 import com.tablenow.tablenow.domain.user.repository.UserRepository;
 import com.tablenow.tablenow.global.security.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +96,7 @@ class AuthServiceTest
             
             // when
             assertThatThrownBy(() -> authService.login(loginRequest))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(UserNotFoundException.class);
             
             // then
             
@@ -108,7 +112,7 @@ class AuthServiceTest
 
             // when
             assertThatThrownBy(() -> authService.login(loginRequest))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidCredentialsException.class);
             
             // then
 
@@ -147,7 +151,7 @@ class AuthServiceTest
             
             // when
             assertThatThrownBy(() -> authService.signup(signupRequest))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(DuplicateEmailException.class);
             
             // then
 
@@ -191,7 +195,7 @@ class AuthServiceTest
 
             // when
             assertThatThrownBy(() -> authService.reissue(reissueRequest))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidRefreshTokenException.class);
 
             // then
 
@@ -222,7 +226,7 @@ class AuthServiceTest
 
             // when
             assertThatThrownBy(() -> authService.logout(userId))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(UserNotFoundException.class);
 
             // then
 
