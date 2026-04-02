@@ -63,14 +63,14 @@ class AuthControllerTest
             LoginRequest loginRequest = new LoginRequest("", "TEst1234!!");
 
             // when & then
-            mockMvc.perform(post("/api/auth//login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(loginRequest)))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("로그인 시 이메일 형식이 잘못되면 500을 반환한다.")
+        @DisplayName("로그인 시 이메일 형식이 잘못되면 400을 반환한다.")
         void givenInvalidEmailFormat_whenLogin_thenReturn400() throws Exception {
             // given
             LoginRequest loginRequest = new LoginRequest("email", "TEst1234!!");
@@ -78,8 +78,8 @@ class AuthControllerTest
             // when & then
             mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .contentType(objectMapper.writeValueAsString(loginRequest)))
-                    .andExpect(status().isInternalServerError());
+                            .content(objectMapper.writeValueAsString(loginRequest)))
+                    .andExpect(status().isBadRequest());
         }
     }
 

@@ -56,7 +56,7 @@ public class AuthIntegrationTest
                 .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isCreated());
 
-        assertThat(userRepository.findByEmail("test@naver.com").isPresent());
+        assertThat(userRepository.findByEmail("test@naver.com")).isPresent();
 
         // 2. 로그인
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
@@ -95,7 +95,7 @@ public class AuthIntegrationTest
     }
     
     @Test
-    @DisplayName("로그인 시 잘못된 비밀번호면 403을 반환한다.")
+    @DisplayName("로그인 시 잘못된 비밀번호면 401을 반환한다.")
     void givenInvalidPassword_whenLogin_thenReturn401() throws Exception {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
