@@ -16,3 +16,9 @@ jwt:
   secret: this-is-a-test-secret-key-with-at-least-32-bytes-length
   access-expiration: 3600000
   refresh-expiration: 1209600000
+
+admin:
+  email: test@test.com
+  password: testpassword
+  username: test
+  phone-number: 00000000000
