@@ -6,7 +6,13 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode
 {
-    USER_NOT_FOUND("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    // users
+    USER_NOT_FOUND("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // auth
+    AUTH_INVALID_CREDENTIALS("이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
+    AUTH_INVALID_REFRESH_TOKEN("유효하지 않은 리프레시 토큰입니다.", HttpStatus.UNAUTHORIZED),
+    AUTH_DUPLICATE_EMAIL("이미 사용 중인 이메일입니다.", HttpStatus.CONFLICT);
 
     private final int status;
     private final String message;
