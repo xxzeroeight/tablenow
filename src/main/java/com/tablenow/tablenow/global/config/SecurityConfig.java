@@ -91,6 +91,7 @@ public class SecurityConfig
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             // 5. HTTP 요청 권한 설정
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/signup", "/api/auth/reissue").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                     .anyRequest().authenticated()

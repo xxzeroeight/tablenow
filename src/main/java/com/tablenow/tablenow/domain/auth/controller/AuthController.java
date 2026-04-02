@@ -1,5 +1,6 @@
 package com.tablenow.tablenow.domain.auth.controller;
 
+import com.tablenow.tablenow.domain.auth.controller.api.AuthApi;
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 @RestController
-public class AuthController
+public class AuthController implements AuthApi
 {
     private final AuthService authService;
 
