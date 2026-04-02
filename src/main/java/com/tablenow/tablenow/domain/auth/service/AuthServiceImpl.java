@@ -5,8 +5,12 @@ import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.domain.auth.entity.RefreshToken;
+import com.tablenow.tablenow.domain.auth.exception.DuplicateEmailException;
+import com.tablenow.tablenow.domain.auth.exception.InvalidCredentialsException;
+import com.tablenow.tablenow.domain.auth.exception.InvalidRefreshTokenException;
 import com.tablenow.tablenow.domain.auth.repository.RefreshTokenRepository;
 import com.tablenow.tablenow.domain.user.entity.User;
+import com.tablenow.tablenow.domain.user.exception.UserNotFoundException;
 import com.tablenow.tablenow.domain.user.repository.UserRepository;
 import com.tablenow.tablenow.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +46,10 @@ public class AuthServiceImpl implements AuthService
     @Override
     public TokenResponse login(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(() -> new UserNotFoundException(loginRequest.email()));
 
         if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
 
         String accessToken = jwtProvider.createAccessToken(user);
@@ -76,11 +80,11 @@ public class AuthServiceImpl implements AuthService
     @Override
     public TokenResponse reissue(ReissueRequest reissueRequest) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(hashToken(reissueRequest.refreshToken()))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(InvalidRefreshTokenException::new);
 
         String userId = jwtProvider.getSubject(reissueRequest.refreshToken());
         User user = userRepository.findById(UUID.fromString(userId))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
+                .orElseThrow(() -> new UserNotFoundException(UUID.fromString(userId)));
 
         String newAccessToken = jwtProvider.createAccessToken(user);
         String newRefreshToken = jwtProvider.createRefreshToken(user);
@@ -102,7 +106,7 @@ public class AuthServiceImpl implements AuthService
     @Override
     public void signup(SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new IllegalArgumentException("Invalid email");
+            throw new DuplicateEmailException(signupRequest.email());
         }
 
         User user = User.builder()
@@ -126,7 +130,7 @@ public class AuthServiceImpl implements AuthService
     @Override
     public void logout(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         refreshTokenRepository.deleteByUser(user);
     }

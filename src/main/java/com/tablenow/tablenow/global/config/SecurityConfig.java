@@ -1,6 +1,7 @@
 package com.tablenow.tablenow.global.config;
 
 import com.tablenow.tablenow.global.security.JwtFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -93,6 +94,11 @@ public class SecurityConfig
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/signup", "/api/auth/reissue").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                     .anyRequest().authenticated()
+            )
+            // 6. 예외 처리 설정
+            .exceptionHandling(exception -> exception
+                    .authenticationEntryPoint((req, resp, e) ->
+                            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
             );
 
         return http.build();
