@@ -40,6 +40,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
 
+    /* docs */
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16'
+
     /* dev tools*/
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
