@@ -2,6 +2,7 @@ package com.tablenow.tablenow.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -33,6 +34,21 @@ public class GlobalExceptionHandler
                         Map.of(),
                         ex.getClass().getSimpleName(),
                         HttpStatus.INTERNAL_SERVER_ERROR.value()
+                ));
+    }
+
+    /* 어노테이션 권한 거부 + 비즈니스 예외 + 검증 실패 */
+    /* AuthorizationDeniedException(@PreAuthorize, 403) */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(
+                        Instant.now(),
+                        "FORBIDDEN",
+                        "접근 권한이 없습니다.",
+                        Map.of(),
+                        ex.getClass().getSimpleName(),
+                        HttpStatus.FORBIDDEN.value()
                 ));
     }
 
