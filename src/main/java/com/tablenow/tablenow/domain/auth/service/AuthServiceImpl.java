@@ -40,7 +40,6 @@ public class AuthServiceImpl implements AuthService
      *
      * @param loginRequest 이메일, 비밀번호
      * @return 발급된 {@link TokenResponse}
-     * @throws IllegalArgumentException 이메일 또는 비밀번호가 일치하지 않을 때
      */
     @Transactional
     @Override
@@ -74,7 +73,6 @@ public class AuthServiceImpl implements AuthService
      *
      * @param reissueRequest 재발급에 사용할 Refresh Token
      * @return 재발급된 {@link TokenResponse}
-     * @throws IllegalArgumentException 유효하지 않은 Refresh Token이거나 사용자가 없을 때
      */
     @Transactional
     @Override
@@ -100,7 +98,6 @@ public class AuthServiceImpl implements AuthService
      * 이메일 중복 시 예외 발생. 비밀번호는 BCrypt로 암호화하여 저장.
      *
      * @param signupRequest 이름, 이메일, 비밀번호, 닉네임, 전화번호
-     * @throws IllegalArgumentException 이미 사용 중인 이메일일 때
      */
     @Transactional
     @Override
@@ -124,7 +121,6 @@ public class AuthServiceImpl implements AuthService
      * 해당 사용자의 Refresh Token을 삭제해 로그아웃 처리.
      *
      * @param userId 로그아웃할 사용자 ID
-     * @throws IllegalArgumentException 사용자가 존재하지 않을 때
      */
     @Transactional
     @Override

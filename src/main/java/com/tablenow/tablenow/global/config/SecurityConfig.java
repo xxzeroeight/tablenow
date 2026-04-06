@@ -1,7 +1,8 @@
 package com.tablenow.tablenow.global.config;
 
+import com.tablenow.tablenow.domain.auth.handler.CustomAccessDeniedHandler;
+import com.tablenow.tablenow.domain.auth.handler.CustomAuthenticationEntryPointHandler;
 import com.tablenow.tablenow.global.security.JwtFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -71,18 +72,23 @@ public class SecurityConfig
     /**
      * Security 필터 체인 설정.
      * <ul>
-     *   <li>CSRF 비활성화</li>
-     *   <li>세션 Stateless (JWT 사용)</li>
-     *   <li>HTTP Basic 비활성화</li>
-     *   <li>모든 요청 허용 (추후 수정 예정)</li>
+     *     <li>CSRF, HTTP Basic 비활성화</li>
+     *     <li>세션 Stateless (JWT 사용)</li>
+     *     <li>{@link JwtFilter}를 {@link UsernamePasswordAuthenticationFilter} 앞에 등록.</li>
+     *     <li>인증/인가 실패 시 각각 {@link CustomAuthenticationEntryPointHandler}, {@link CustomAccessDeniedHandler}로 처리.</li>
      * </ul>
      *
-     * @param http {@link HttpSecurity}
-     * @return {@link SecurityFilterChain}
+     * @param http                                  {@link HttpSecurity}
+     * @param customAuthenticationEntryPointHandler 인증 실패(401) 처리 핸들러
+     * @param customAccessDeniedHandler             인가 실패(403) 처리 핸들러
+     * @return 구성된 {@link SecurityFilterChain}
      * @throws Exception 설정 중 오류 발생 시
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomAuthenticationEntryPointHandler customAuthenticationEntryPointHandler,
+                                                   CustomAccessDeniedHandler customAccessDeniedHandler) throws Exception
+    {
         http
             // 1. CSRF 설정
             .csrf(AbstractHttpConfigurer::disable)
@@ -102,10 +108,8 @@ public class SecurityConfig
             )
             // 6. 예외 처리 설정
             .exceptionHandling(exception -> exception
-                    .authenticationEntryPoint((req, resp, e) ->
-                            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                    .accessDeniedHandler((req, resp, e) ->
-                            resp.sendError(HttpServletResponse.SC_FORBIDDEN))
+                    .authenticationEntryPoint(customAuthenticationEntryPointHandler)
+                    .accessDeniedHandler(customAccessDeniedHandler)
             );
 
         return http.build();
