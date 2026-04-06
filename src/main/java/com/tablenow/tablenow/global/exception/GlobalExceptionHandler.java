@@ -37,7 +37,7 @@ public class GlobalExceptionHandler
                 ));
     }
 
-    /* 어노테이션 권한 거부 + 비즈니스 예외 + 검증 실패 */
+    /* 메서드 레벨 권한 거부 */
     /* AuthorizationDeniedException(@PreAuthorize, 403) */
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
