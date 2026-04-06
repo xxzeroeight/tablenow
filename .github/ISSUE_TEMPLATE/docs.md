@@ -6,7 +6,8 @@ labels: docs
 assignees: xxzeroeight
 ---
 
-## 기능 설명
+## 문서 대상
+<!-- 어떤 API/기능에 대한 문서인지 -->
 
 ## 작업 내용
 - [ ] 
