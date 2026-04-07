@@ -6,6 +6,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -49,6 +50,20 @@ public class GlobalExceptionHandler
                         Map.of(),
                         ex.getClass().getSimpleName(),
                         HttpStatus.FORBIDDEN.value()
+                ));
+    }
+
+    /* MissingRequestCookieException(401) */
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponse> handleMissingCookie(MissingRequestCookieException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        Instant.now(),
+                        "UNAUTHORIZED",
+                        "인증 정보가 없습니다.",
+                        Map.of(),
+                        ex.getClass().getSimpleName(),
+                        HttpStatus.UNAUTHORIZED.value()
                 ));
     }
 

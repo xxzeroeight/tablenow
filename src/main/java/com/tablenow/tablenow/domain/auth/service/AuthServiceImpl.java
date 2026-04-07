@@ -1,7 +1,6 @@
 package com.tablenow.tablenow.domain.auth.service;
 
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
-import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
@@ -72,25 +71,25 @@ public class AuthServiceImpl implements AuthService
      * <p>
      * Refresh Token은 갱신 (rotate).
      *
-     * @param reissueRequest 재발급에 사용할 Refresh Token
+     * @param refreshToken 재발급에 사용할 Refresh Token
      * @return 재발급된 {@link TokenResponse}
      */
     @Transactional
     @Override
-    public TokenResponse reissue(ReissueRequest reissueRequest) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(hashToken(reissueRequest.refreshToken()))
+    public TokenDto reissue(String refreshToken) {
+        RefreshToken stored = refreshTokenRepository.findByToken(hashToken(refreshToken))
                 .orElseThrow(InvalidRefreshTokenException::new);
 
-        String userId = jwtProvider.getSubject(reissueRequest.refreshToken());
+        String userId = jwtProvider.getSubject(refreshToken);
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new UserNotFoundException(UUID.fromString(userId)));
 
         String newAccessToken = jwtProvider.createAccessToken(user);
         String newRefreshToken = jwtProvider.createRefreshToken(user);
 
-        refreshToken.update(hashToken(newRefreshToken));
+        stored.update(hashToken(newRefreshToken));
 
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return new TokenDto(newAccessToken, newRefreshToken);
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.tablenow.tablenow.domain.auth.controller.api;
 
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
-import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.global.exception.ErrorResponse;
@@ -16,12 +15,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Auth", description = "인증/인가 API")
 public interface AuthApi
 {
-    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하여 토큰을 발급받습니다.")
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다. Refresh Token은 쿠키로 발급됩니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공",
                     content = @Content(schema = @Schema(implementation = TokenResponse.class))),
@@ -38,14 +38,14 @@ public interface AuthApi
     })
     ResponseEntity<Void> signup(@RequestBody @Valid SignupRequest signupRequest);
 
-    @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 새로운 토큰을 발급받습니다.")
+    @Operation(summary = "토큰 재발급", description = "쿠키의 Refresh Token으로 Access Token을 재발급합니다. Refresh Token도 함께 갱신됩니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "재발급 성공",
                     content = @Content(schema = @Schema(implementation = TokenResponse.class))),
             @ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<TokenResponse> reissue(@RequestBody @Valid ReissueRequest reissueRequest);
+    ResponseEntity<TokenResponse> reissue(@CookieValue(name = "refresh_token") String refreshToken);
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 삭제하고 로그아웃합니다.",
             security = @SecurityRequirement(name = "bearerAuth"))
