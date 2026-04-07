@@ -2,28 +2,35 @@ package com.tablenow.tablenow.domain.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
-import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
-import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
+import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
 import com.tablenow.tablenow.domain.auth.service.AuthService;
 import com.tablenow.tablenow.global.security.CustomUserDetailsService;
 import com.tablenow.tablenow.global.security.JwtProvider;
+import com.tablenow.tablenow.global.util.CookieUtil;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
+@Import(CookieUtil.class)
 @AutoConfigureMockMvc(addFilters = false)
 @DisplayName("AuthController Slice Test")
 class AuthControllerTest
@@ -43,9 +50,9 @@ class AuthControllerTest
         void givenValidRequest_whenLogin_thenReturn200WithToken() throws Exception{
             // given
             LoginRequest loginRequest = new LoginRequest("test@naver.com", "TEst1234!!");
-            TokenResponse tokenResponse = new TokenResponse("access-token", "refresh-token");
+            TokenDto tokenDto = new TokenDto("access-token", "refresh-token");
 
-            given(authService.login(loginRequest)).willReturn(tokenResponse);
+            given(authService.login(any(LoginRequest.class))).willReturn(tokenDto);
 
             // when & then
             mockMvc.perform(post("/api/auth/login")
@@ -53,7 +60,12 @@ class AuthControllerTest
                             .content(objectMapper.writeValueAsString(loginRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.accessToken").value("access-token"))
-                    .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
+                    .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                    .andExpect(header().exists(HttpHeaders.SET_COOKIE))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("refresh_token=refresh-token")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Secure")))
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Strict")));
         }
 
         @Test
@@ -139,31 +151,25 @@ class AuthControllerTest
         @DisplayName("재발급 시 유효한 요청이면 200과 새 토큰을 반환한다.")
         void givenValidRequest_whenReissue_thenReturn200WithToken() throws Exception {
             // given
-            ReissueRequest reissueRequest = new ReissueRequest("refresh-token");
-            TokenResponse tokenResponse = new TokenResponse("new-access-token", "new-refresh-token");
+            TokenDto tokenDto = new TokenDto("new-access-token", "new-refresh-token");
 
-            given(authService.reissue(reissueRequest)).willReturn(tokenResponse);
+            given(authService.reissue("old-refresh-token")).willReturn(tokenDto);
 
             // when & then
             mockMvc.perform(post("/api/auth/reissue")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(reissueRequest)))
+                            .cookie(new Cookie("refresh_token", "old-refresh-token")))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.accessToken").value("new-access-token"))
-                    .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"));
+                    .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                    .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("refresh_token=new-refresh-token")));
         }
 
         @Test
-        @DisplayName("재발급 시 리프레시토큰이 비어있으면 400을 반환한다.")
-        void givenBlankRefreshToken_whenReissue_thenReturn400() throws Exception {
-            // given
-            ReissueRequest reissueRequest = new ReissueRequest("");
-
+        @DisplayName("재발급 시 쿠키가 없으면 401을 반환한다.")
+        void givenMissingCookie_whenReissue_thenReturn401() throws Exception {
             // when & then
-            mockMvc.perform(post("/api/auth/reissue")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(reissueRequest)))
-                    .andExpect(status().isBadRequest());
+            mockMvc.perform(post("/api/auth/reissue"))
+                    .andExpect(status().isUnauthorized());
         }
     }
 }

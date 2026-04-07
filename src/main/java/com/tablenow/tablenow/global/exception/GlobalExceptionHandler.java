@@ -2,9 +2,11 @@ package com.tablenow.tablenow.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -33,6 +35,35 @@ public class GlobalExceptionHandler
                         Map.of(),
                         ex.getClass().getSimpleName(),
                         HttpStatus.INTERNAL_SERVER_ERROR.value()
+                ));
+    }
+
+    /* 메서드 레벨 권한 거부 */
+    /* AuthorizationDeniedException(@PreAuthorize, 403) */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(
+                        Instant.now(),
+                        "FORBIDDEN",
+                        "접근 권한이 없습니다.",
+                        Map.of(),
+                        ex.getClass().getSimpleName(),
+                        HttpStatus.FORBIDDEN.value()
+                ));
+    }
+
+    /* MissingRequestCookieException(401) */
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponse> handleMissingCookie(MissingRequestCookieException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        Instant.now(),
+                        "UNAUTHORIZED",
+                        "인증 정보가 없습니다.",
+                        Map.of(),
+                        ex.getClass().getSimpleName(),
+                        HttpStatus.UNAUTHORIZED.value()
                 ));
     }
 
