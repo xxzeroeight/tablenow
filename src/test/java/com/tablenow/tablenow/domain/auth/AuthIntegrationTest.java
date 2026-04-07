@@ -94,7 +94,9 @@ public class AuthIntegrationTest
         Cookie reissueCookie = reissueResult.getResponse().getCookie("refresh_token");
 
         assertThat(reissueResponse.accessToken()).isNotEmpty();
-        assertThat(reissueCookie.getValue()).isEqualTo(loginCookie.getValue());
+        assertThat(reissueCookie).isNotNull();
+        assertThat(reissueCookie.getValue()).isNotBlank();
+        assertThat(reissueCookie.getValue()).isNotEqualTo(loginCookie.getValue());
 
         // 4. 로그아웃
         mockMvc.perform(post("/api/auth/logout")
@@ -124,9 +126,11 @@ public class AuthIntegrationTest
     @Test
     @DisplayName("재발급 시 잘못된 리프레시토큰이면 401을 반환한다.")
     void givenInvalidRefreshToken_whenReissue_thenReturn401() throws Exception {
+        Cookie invalidRefreshToken = new Cookie("refresh_token", "invalid-refresh-token");
+
         mockMvc.perform(post("/api/auth/reissue")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString("valid-refresh-token")))
+                        .cookie(invalidRefreshToken))
                 .andExpect(status().isUnauthorized());
     }
 

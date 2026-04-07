@@ -166,7 +166,7 @@ class AuthControllerTest
 
         @Test
         @DisplayName("재발급 시 쿠키가 없으면 401을 반환한다.")
-        void givenBlankRefreshToken_whenReissue_thenReturn400() throws Exception {
+        void givenMissingCookie_whenReissue_thenReturn401() throws Exception {
             // when & then
             mockMvc.perform(post("/api/auth/reissue"))
                     .andExpect(status().isUnauthorized());
