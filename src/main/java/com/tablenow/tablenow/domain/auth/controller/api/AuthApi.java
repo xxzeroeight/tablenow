@@ -50,7 +50,7 @@ public interface AuthApi
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 삭제하고 로그아웃합니다.",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @ApiResponse(responseCode = "204", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "401", description = "미인증 사용자")
     })
     ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails);

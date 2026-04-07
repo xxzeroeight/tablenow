@@ -3,7 +3,6 @@ package com.tablenow.tablenow.domain.auth.service;
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
-import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.domain.auth.entity.RefreshToken;
 import com.tablenow.tablenow.domain.auth.exception.DuplicateEmailException;
 import com.tablenow.tablenow.domain.auth.exception.InvalidCredentialsException;
@@ -39,7 +38,7 @@ public class AuthServiceImpl implements AuthService
      * 기존 Refresh Token은 삭제 후 새로 저장 (DB에는 해시값으로 저장)
      *
      * @param loginRequest 이메일, 비밀번호
-     * @return 발급된 {@link TokenResponse}
+     * @return 발급된 {@link TokenDto}
      */
     @Transactional
     @Override
@@ -72,7 +71,7 @@ public class AuthServiceImpl implements AuthService
      * Refresh Token은 갱신 (rotate).
      *
      * @param refreshToken 재발급에 사용할 Refresh Token
-     * @return 재발급된 {@link TokenResponse}
+     * @return 재발급된 {@link TokenDto}
      */
     @Transactional
     @Override
