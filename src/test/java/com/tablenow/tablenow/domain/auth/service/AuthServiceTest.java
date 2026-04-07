@@ -1,9 +1,8 @@
 package com.tablenow.tablenow.domain.auth.service;
 
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
-import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
-import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
+import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
 import com.tablenow.tablenow.domain.auth.entity.RefreshToken;
 import com.tablenow.tablenow.domain.auth.exception.DuplicateEmailException;
 import com.tablenow.tablenow.domain.auth.exception.InvalidCredentialsException;
@@ -77,11 +76,10 @@ class AuthServiceTest
             given(jwtProvider.createRefreshToken(user)).willReturn("refresh-token");
 
             // when
-            TokenResponse tokenResponse = authService.login(loginRequest);
+            TokenDto tokenDto = authService.login(loginRequest);
 
             // then
-            assertThat(tokenResponse.accessToken()).isEqualTo("access-token");
-            assertThat(tokenResponse.refreshToken()).isEqualTo("refresh-token");
+            assertThat(tokenDto.accessToken()).isEqualTo("access-token");
 
             verify(refreshTokenRepository).save(any(RefreshToken.class));
         }
@@ -165,36 +163,33 @@ class AuthServiceTest
         @DisplayName("유효한 리프레시토큰이면 새 토큰을 반환한다.")
         void givenValidRefreshToken_whenReissue_thenReturnNewToken() {
             // given
-            ReissueRequest reissueRequest = new ReissueRequest("old-refresh-token");
-            RefreshToken refreshToken = RefreshToken.builder()
+            RefreshToken stored = RefreshToken.builder()
                     .token("hashed-token")
                     .user(user)
                     .build();
 
-            given(refreshTokenRepository.findByToken(anyString())).willReturn(Optional.of(refreshToken));
-            given(jwtProvider.getSubject(reissueRequest.refreshToken())).willReturn(userId.toString());
+            given(refreshTokenRepository.findByToken(anyString())).willReturn(Optional.of(stored));
+            given(jwtProvider.getSubject("valid-refresh-token")).willReturn(userId.toString());
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
             given(jwtProvider.createAccessToken(user)).willReturn("new-access-token");
             given(jwtProvider.createRefreshToken(user)).willReturn("new-refresh-token");
 
             // when
-            TokenResponse tokenResponse = authService.reissue(reissueRequest);
+            TokenDto tokenDto = authService.reissue("valid-refresh-token");
 
             // then
-            assertThat(tokenResponse.accessToken()).isEqualTo("new-access-token");
-            assertThat(tokenResponse.refreshToken()).isEqualTo("new-refresh-token");
+            assertThat(tokenDto.accessToken()).isEqualTo("new-access-token");
+            assertThat(tokenDto.refreshToken()).isEqualTo("new-refresh-token");
         }
 
         @Test
         @DisplayName("잘못된 리프레시토큰이면 예외를 던진다.")
         void givenInvalidRefreshToken_whenReissue_thenThrowException() {
             // given
-            ReissueRequest reissueRequest = new ReissueRequest("invalid-token");
-
             given(refreshTokenRepository.findByToken(anyString())).willReturn(Optional.empty());
 
             // when
-            assertThatThrownBy(() -> authService.reissue(reissueRequest))
+            assertThatThrownBy(() -> authService.reissue("valid-refresh-token"))
                     .isInstanceOf(InvalidRefreshTokenException.class);
 
             // then
