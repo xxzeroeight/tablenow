@@ -3,6 +3,7 @@ package com.tablenow.tablenow.domain.auth.service;
 import com.tablenow.tablenow.domain.auth.dto.request.LoginRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.ReissueRequest;
 import com.tablenow.tablenow.domain.auth.dto.request.SignupRequest;
+import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.domain.auth.entity.RefreshToken;
 import com.tablenow.tablenow.domain.auth.exception.DuplicateEmailException;
@@ -43,7 +44,7 @@ public class AuthServiceImpl implements AuthService
      */
     @Transactional
     @Override
-    public TokenResponse login(LoginRequest loginRequest) {
+    public TokenDto login(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new UserNotFoundException(loginRequest.email()));
 
@@ -56,14 +57,14 @@ public class AuthServiceImpl implements AuthService
 
         refreshTokenRepository.findByUser(user)
                 .ifPresentOrElse(
-                        existingToken -> existingToken.update(refreshToken),
+                        existingToken -> existingToken.update(hashToken(refreshToken)),
                         () -> refreshTokenRepository.save(RefreshToken.builder()
                                         .token(hashToken(refreshToken))
                                         .user(user)
                                         .build())
                 );
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenDto(accessToken, refreshToken);
     }
 
     /**
