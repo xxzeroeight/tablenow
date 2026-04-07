@@ -7,6 +7,7 @@ import com.tablenow.tablenow.domain.auth.dto.response.TokenDto;
 import com.tablenow.tablenow.domain.auth.dto.response.TokenResponse;
 import com.tablenow.tablenow.domain.auth.service.AuthService;
 import com.tablenow.tablenow.global.security.CustomUserDetails;
+import com.tablenow.tablenow.global.util.CookieUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -28,19 +29,14 @@ import java.time.Duration;
 public class AuthController implements AuthApi
 {
     private final AuthService authService;
+    private final CookieUtil cookieUtil;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest loginRequest)
     {
         TokenDto tokenDto = authService.login(loginRequest);
 
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", tokenDto.refreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/api/auth")
-                .maxAge(Duration.ofDays(7))
-                .build();
+        ResponseCookie cookie = cookieUtil.buildRefreshTokenCookie(tokenDto.refreshToken(), Duration.ofDays(7));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -60,13 +56,7 @@ public class AuthController implements AuthApi
     {
         TokenDto tokenDto = authService.reissue(refreshToken);
 
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", tokenDto.refreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/api/auth")
-                .maxAge(Duration.ofDays(7))
-                .build();
+        ResponseCookie cookie = cookieUtil.buildRefreshTokenCookie(tokenDto.refreshToken(), Duration.ofDays(7));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -77,6 +67,10 @@ public class AuthController implements AuthApi
     public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         authService.logout(customUserDetails.getUserId());
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        ResponseCookie cookie = cookieUtil.buildRefreshTokenCookie("", Duration.ZERO);
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 }
