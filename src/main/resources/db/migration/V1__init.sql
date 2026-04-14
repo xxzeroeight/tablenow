@@ -136,10 +136,12 @@ CREATE TABLE business_hours
 
 CREATE TABLE restaurant_bookmarks
 (
-    PRIMARY KEY (user_id, restaurant_id),
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    user_id       UUID        NOT NULL,
-    restaurant_id UUID        NOT NULL,
+    id            UUID        PRIMARY KEY NOT NULL,
+    created_at    TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
+    user_id       UUID                    NOT NULL,
+    restaurant_id UUID                    NOT NULL,
+
+    CONSTRAINT uq_restaurant_bookmarks_user_restaurant UNIQUE (user_id, restaurant_id),
 
     CONSTRAINT fk_restaurant_bookmarks_user_id       FOREIGN KEY (user_id)       REFERENCES users       (id) ON DELETE CASCADE,
     CONSTRAINT fk_restaurant_bookmarks_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
