@@ -121,14 +121,15 @@ CREATE TABLE business_hours
 (
     id            UUID        PRIMARY KEY NOT NULL,
     day_of_week   VARCHAR(10)             NOT NULL,
+    slot_order    SMALLINT                NOT NULL DEFAULT 1,
     open_time     TIME                    NOT NULL,
     close_time    TIME                    NOT NULL,
-    is_closed     BOOLEAN                 NOT NULL DEFAULT false,
     created_at    TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
     restaurant_id UUID                    NOT NULL,
 
-    CONSTRAINT uq_business_hours_restaurant_day_of_week UNIQUE (restaurant_id, day_of_week),
+    CONSTRAINT uq_business_hours_restaurant_day_slot UNIQUE (restaurant_id, day_of_week, slot_order),
+    CONSTRAINT ck_business_hours_time_range          CHECK  (close_time > open_time),
 
     CONSTRAINT fk_business_hours_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
 );

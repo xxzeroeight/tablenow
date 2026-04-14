@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -26,8 +27,8 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "business_hours",
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_business_hours_restaurant_day_of_week",
-                columnNames = {"restaurant_id", "day_of_week"}
+                name = "uq_business_hours_restaurant_day_slot",
+                columnNames = {"restaurant_id", "day_of_week", "slot_order"}
         )
 )
 public class BusinessHour extends BaseUpdatableEntity
@@ -36,17 +37,26 @@ public class BusinessHour extends BaseUpdatableEntity
     @Column(name = "day_of_week", length = 10, nullable = false)
     private DayOfWeek dayOfWeek;
 
+    @Column(name = "slot_order", nullable = false)
+    private short slotOrder = 1;
+
     @Column(name = "open_time", nullable = false)
     private LocalTime openTime;
 
     @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
 
-    @Column(name = "is_closed", nullable = false)
-    private boolean isClosed = false;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_business_hours_restaurant_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Restaurant restaurant;
+
+    @Builder
+    protected BusinessHour(DayOfWeek dayOfWeek, short slotOrder, LocalTime openTime, LocalTime closeTime, Restaurant restaurant) {
+        this.dayOfWeek = dayOfWeek;
+        this.slotOrder = slotOrder;
+        this.openTime = openTime;
+        this.closeTime = closeTime;
+        this.restaurant = restaurant;
+    }
 }
