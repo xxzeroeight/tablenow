@@ -4,7 +4,6 @@ import com.tablenow.tablenow.domain.restaurant.entity.Restaurant;
 import com.tablenow.tablenow.domain.user.entity.User;
 import com.tablenow.tablenow.global.common.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
@@ -16,22 +15,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "restaurant_bookmarks")
 public class Bookmark extends BaseEntity
 {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_restaurant_bookmarks_user_id"))
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_restaurant_bookmarks_user_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_restaurant_bookmarks_restaurant_id"))
+    @JoinColumn(name = "restaurant_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_restaurant_bookmarks_restaurant_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Restaurant restaurant;
 
