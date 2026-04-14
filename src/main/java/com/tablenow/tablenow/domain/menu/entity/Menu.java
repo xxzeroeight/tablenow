@@ -38,7 +38,7 @@ public class Menu extends BaseUpdatableEntity
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
-    private Status status;
+    private MenuStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_menus_restaurant_id"))
@@ -46,7 +46,7 @@ public class Menu extends BaseUpdatableEntity
     private Restaurant restaurant;
 
     @Builder
-    protected Menu(String name, Integer price, String description, String s3Key, Status status, Restaurant restaurant) {
+    protected Menu(String name, Integer price, String description, String s3Key, MenuStatus status, Restaurant restaurant) {
         this.name = name;
         this.price = price;
         this.description = description;
