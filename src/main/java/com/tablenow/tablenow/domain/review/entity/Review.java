@@ -1,7 +1,6 @@
 package com.tablenow.tablenow.domain.review.entity;
 
 import com.tablenow.tablenow.domain.reservation.entity.Reservation;
-import com.tablenow.tablenow.domain.restaurant.entity.Restaurant;
 import com.tablenow.tablenow.domain.user.entity.User;
 import com.tablenow.tablenow.global.common.BaseUpdatableEntity;
 import jakarta.persistence.Column;
@@ -41,17 +40,11 @@ public class Review extends BaseUpdatableEntity
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Reservation reservation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_reviews_restaurant_id"))
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Restaurant restaurant;
-
     @Builder
-    private Review(int rating, String content, User user, Reservation reservation, Restaurant restaurant) {
+    private Review(int rating, String content, User user, Reservation reservation) {
         this.rating = rating;
         this.content = content;
         this.user = user;
         this.reservation = reservation;
-        this.restaurant = restaurant;
     }
 }
