@@ -4,6 +4,8 @@ import com.tablenow.tablenow.domain.user.entity.User;
 import com.tablenow.tablenow.global.common.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @Table(name = "alarms")
 public class Alarm extends BaseUpdatableEntity
 {
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", length = 20, nullable = false)
     private AlarmType type;
 
