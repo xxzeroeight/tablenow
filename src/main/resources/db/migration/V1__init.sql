@@ -80,14 +80,12 @@ CREATE TABLE reviews
     created_at     TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
     updated_at     TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
     user_id        UUID                    NULL,
-    reservation_id UUID                    NULL,
-    restaurant_id  UUID                    NOT NULL,
+    reservation_id UUID                    NOT NULL UNIQUE,
 
     CONSTRAINT ck_reviews_rating             CHECK (rating >= 1 AND rating <= 5),
 
     CONSTRAINT fk_reviews_user_id        FOREIGN KEY (user_id)        REFERENCES users        (id) ON DELETE SET NULL,
-    CONSTRAINT fk_reviews_reservation_id FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE SET NULL,
-    CONSTRAINT fk_reviews_restaurant_id  FOREIGN KEY (restaurant_id)  REFERENCES restaurants  (id) ON DELETE CASCADE
+    CONSTRAINT fk_reviews_reservation_id FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE CASCADE
 );
 
 CREATE TABLE waitings
