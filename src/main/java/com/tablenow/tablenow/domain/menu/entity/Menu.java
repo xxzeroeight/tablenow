@@ -28,7 +28,7 @@ public class Menu extends BaseUpdatableEntity
     private String name;
 
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private int price;
 
     @Column(name = "description", length = 100, nullable = false)
     private String description;
@@ -46,7 +46,7 @@ public class Menu extends BaseUpdatableEntity
     private Restaurant restaurant;
 
     @Builder
-    protected Menu(String name, Integer price, String description, String s3Key, MenuStatus status, Restaurant restaurant) {
+    protected Menu(String name, int price, String description, String s3Key, MenuStatus status, Restaurant restaurant) {
         this.name = name;
         this.price = price;
         this.description = description;
