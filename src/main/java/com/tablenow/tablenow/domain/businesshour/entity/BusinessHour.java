@@ -38,7 +38,7 @@ public class BusinessHour extends BaseUpdatableEntity
     private DayOfWeek dayOfWeek;
 
     @Column(name = "slot_order", nullable = false)
-    private short slotOrder = 1;
+    private Short slotOrder;
 
     @Column(name = "open_time", nullable = false)
     private LocalTime openTime;
@@ -52,9 +52,9 @@ public class BusinessHour extends BaseUpdatableEntity
     private Restaurant restaurant;
 
     @Builder
-    protected BusinessHour(DayOfWeek dayOfWeek, short slotOrder, LocalTime openTime, LocalTime closeTime, Restaurant restaurant) {
+    protected BusinessHour(DayOfWeek dayOfWeek, Short slotOrder, LocalTime openTime, LocalTime closeTime, Restaurant restaurant) {
         this.dayOfWeek = dayOfWeek;
-        this.slotOrder = slotOrder;
+        this.slotOrder = slotOrder == null ? 1 : slotOrder;
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.restaurant = restaurant;

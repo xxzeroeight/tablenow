@@ -4,6 +4,6 @@ public enum WaitingStatus
 {
     WAITING,
     ENTERED,
-    CANCELED,
+    CANCELLED,
     EXPIRED
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -28,4 +29,10 @@ public class RestaurantTable extends BaseUpdatableEntity
     @JoinColumn(name = "restaurant_id", nullable = false, referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_restaurant_tables_restaurant_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Restaurant restaurant;
+
+    @Builder
+    public RestaurantTable(int capacity, Restaurant restaurant) {
+        this.capacity = capacity;
+        this.restaurant = restaurant;
+    }
 }

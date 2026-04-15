@@ -50,6 +50,7 @@ CREATE TABLE reservations
 
     CONSTRAINT uq_reservations_restaurant_date_time UNIQUE (restaurant_id, reservation_date, reservation_time),
     CONSTRAINT ck_reservations_status               CHECK  (status IN ('CONFIRMED', 'CANCELLED', 'NO_SHOW')),
+    CONSTRAINT ck_reservations_guest_count          CHECK (guest_count >= 1),
 
     CONSTRAINT fk_reservations_user_id       FOREIGN KEY (user_id)       REFERENCES users       (id) ON DELETE SET NULL,
     CONSTRAINT fk_reservations_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
@@ -68,6 +69,7 @@ CREATE TABLE menus
     restaurant_id UUID                    NOT NULL,
 
     CONSTRAINT ck_menus_status        CHECK (status IN ('PREPARING', 'ON_SALE', 'SOLD_OUT')),
+    CONSTRAINT ck_menus_price         CHECK (price >= 0),
 
     CONSTRAINT fk_menus_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
 );
@@ -82,7 +84,7 @@ CREATE TABLE reviews
     user_id        UUID                    NULL,
     reservation_id UUID                    NOT NULL UNIQUE,
 
-    CONSTRAINT ck_reviews_rating             CHECK (rating >= 1 AND rating <= 5),
+    CONSTRAINT ck_reviews_rating         CHECK (rating >= 1 AND rating <= 5),
 
     CONSTRAINT fk_reviews_user_id        FOREIGN KEY (user_id)        REFERENCES users        (id) ON DELETE SET NULL,
     CONSTRAINT fk_reviews_reservation_id FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE CASCADE
@@ -98,7 +100,8 @@ CREATE TABLE waitings
     user_id       UUID                    NOT NULL,
     restaurant_id UUID                    NOT NULL,
 
-    CONSTRAINT ck_waitings_status            CHECK (status IN ('WAITING', 'ENTERED', 'CANCELLED', 'EXPIRED')),
+    CONSTRAINT ck_waitings_status        CHECK (status IN ('WAITING', 'ENTERED', 'CANCELLED', 'EXPIRED')),
+    CONSTRAINT ck_waitings_guest_count   CHECK (guest_count >= 1),
 
     CONSTRAINT fk_waitings_user_id       FOREIGN KEY (user_id)       REFERENCES users       (id) ON DELETE CASCADE,
     CONSTRAINT fk_waitings_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
@@ -127,6 +130,7 @@ CREATE TABLE business_hours
     restaurant_id UUID                    NOT NULL,
 
     CONSTRAINT uq_business_hours_restaurant_day_slot UNIQUE (restaurant_id, day_of_week, slot_order),
+    CONSTRAINT ck_business_hours_slot_order          CHECK (slot_order IN (1, 2)),
     CONSTRAINT ck_business_hours_time_range          CHECK  (close_time > open_time),
 
     CONSTRAINT fk_business_hours_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE
