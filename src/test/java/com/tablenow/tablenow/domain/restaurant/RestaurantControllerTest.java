@@ -5,6 +5,7 @@ import com.tablenow.tablenow.domain.restaurant.dto.entity.RestaurantDto;
 import com.tablenow.tablenow.domain.restaurant.dto.request.CreateRestaurantRequest;
 import com.tablenow.tablenow.domain.restaurant.dto.request.UpdateRestaurantRequest;
 import com.tablenow.tablenow.domain.restaurant.service.RestaurantService;
+import com.tablenow.tablenow.domain.user.entity.Role;
 import com.tablenow.tablenow.domain.user.entity.User;
 import com.tablenow.tablenow.global.security.CustomUserDetails;
 import com.tablenow.tablenow.global.security.CustomUserDetailsService;
@@ -61,6 +62,7 @@ class RestaurantControllerTest
                 .username("owner")
                 .password("Test1234!!")
                 .phoneNumber("01012345678")
+                .role(Role.OWNER)
                 .build();
 
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
@@ -145,7 +147,7 @@ class RestaurantControllerTest
             // when & then
             mockMvc.perform(patch("/api/restaurants/{id}", restaurantId)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateRestaurantDto)))
+                            .content(objectMapper.writeValueAsString(updateRestaurantRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name").value("새 맛집"));
         }

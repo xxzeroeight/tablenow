@@ -10,6 +10,7 @@ import com.tablenow.tablenow.domain.restaurant.exception.RestaurantAccessDeniedE
 import com.tablenow.tablenow.domain.restaurant.exception.RestaurantNotFoundException;
 import com.tablenow.tablenow.domain.restaurant.mapper.RestaurantMapper;
 import com.tablenow.tablenow.domain.restaurant.repository.RestaurantRepository;
+import com.tablenow.tablenow.domain.user.entity.Role;
 import com.tablenow.tablenow.domain.user.entity.User;
 import com.tablenow.tablenow.domain.user.exception.UserNotFoundException;
 import com.tablenow.tablenow.domain.user.repository.UserRepository;
@@ -58,11 +59,17 @@ class RestaurantServiceTest
         categoryId = UUID.randomUUID();
 
         user = User.builder()
-                .email("사장님")
+                .name("사장님")
                 .email("owner@test.com")
                 .username("owner")
-                .email("encoded")
+                .password("encoded")
                 .phoneNumber("01012345678")
+                .password("password")
+                .role(Role.OWNER)
+                .build();
+
+        category = Category.builder()
+                .name("한식")
                 .build();
 
         restaurant = Restaurant.builder()
@@ -72,10 +79,6 @@ class RestaurantServiceTest
                 .addressDetail("1층")
                 .user(user)
                 .category(category)
-                .build();
-
-        category = Category.builder()
-                .name("한식")
                 .build();
 
         ReflectionTestUtils.setField(user, "id", userId);
@@ -95,7 +98,7 @@ class RestaurantServiceTest
             );
 
             RestaurantDto restaurantDto = new RestaurantDto(
-                    userId, "맛집", "설명", "서울시 강남구", "1층", Instant.now(), Instant.now()
+                    restaurantId, "맛집", "설명", "서울시 강남구", "1층", Instant.now(), Instant.now()
             );
 
             given(userRepository.findById(userId)).willReturn(Optional.of(user));
@@ -108,6 +111,7 @@ class RestaurantServiceTest
 
             // then
             assertThat(result.name()).isEqualTo("맛집");
+            assertThat(result.id()).isEqualTo(restaurantId);
 
             then(restaurantRepository).should().save(any(Restaurant.class));
             then(restaurantMapper).should().toDto(any(Restaurant.class));
