@@ -18,7 +18,7 @@ public enum ErrorCode
     CATEGORY_NOT_FOUND("카테고리를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // restaurant
-    RESTAURANT_NOT_FOUND("레스트랑을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    RESTAURANT_NOT_FOUND("레스토랑을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     RESTAURANT_ACCESS_DENIED("해당 레스토랑에 대한 권한이 없습니다.", HttpStatus.FORBIDDEN);
 
     private final int status;

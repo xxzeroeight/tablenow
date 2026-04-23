@@ -10,8 +10,8 @@ public record RestaurantResponse
         UUID id,
         String name,
         String description,
-        String email,
-        String eamilDetail,
+        String address,
+        String addressDetail,
         Instant createdAt,
         Instant updatedAt
 ) {

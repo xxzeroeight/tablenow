@@ -6,6 +6,7 @@ import com.tablenow.tablenow.domain.restaurant.dto.request.UpdateRestaurantReque
 import com.tablenow.tablenow.domain.restaurant.dto.response.RestaurantResponse;
 import com.tablenow.tablenow.domain.restaurant.service.RestaurantService;
 import com.tablenow.tablenow.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class RestaurantController
 
     @PostMapping
     public ResponseEntity<RestaurantResponse> createdRestaurant(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                                @RequestBody CreateRestaurantRequest createRestaurantRequest)
+                                                                @RequestBody @Valid CreateRestaurantRequest createRestaurantRequest)
     {
         UUID userId = customUserDetails.getUserId();
 
@@ -42,7 +43,7 @@ public class RestaurantController
     @PatchMapping("/{restaurantId}")
     public ResponseEntity<RestaurantResponse> updatedRestaurant(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                                 @PathVariable UUID restaurantId,
-                                                                @RequestBody UpdateRestaurantRequest updateRestaurantRequest)
+                                                                @RequestBody @Valid UpdateRestaurantRequest updateRestaurantRequest)
     {
         UUID userId = customUserDetails.getUserId();
 
