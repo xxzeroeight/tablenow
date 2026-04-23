@@ -54,4 +54,12 @@ public class Restaurant extends BaseUpdatableEntity
         this.user = user;
         this.category = category;
     }
+
+    public void update(String name, String description, String address, String addressDetail, Category category) {
+        if (name != null) this.name = name;
+        if (description != null) this.description = description;
+        if (address != null) this.address = address;
+        if (addressDetail != null) this.addressDetail = addressDetail;
+        if (category != null) this.category = category;
+    }
 }

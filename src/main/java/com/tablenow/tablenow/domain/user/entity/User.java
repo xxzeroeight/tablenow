@@ -1,7 +1,11 @@
 package com.tablenow.tablenow.domain.user.entity;
 
 import com.tablenow.tablenow.global.common.BaseUpdatableEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,15 +34,16 @@ public class User extends BaseUpdatableEntity
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20, nullable = false)
-    private Role role = Role.USER;
+    private Role role;
 
     @Builder
-    protected User(String name, String email, String username, String password, String phoneNumber) {
+    protected User(String name, String email, String username, String password, String phoneNumber, Role role) {
         this.name = name;
         this.email = email;
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.role = role != null ? role : Role.USER;
     }
 
     public void changeRole(Role role) {
