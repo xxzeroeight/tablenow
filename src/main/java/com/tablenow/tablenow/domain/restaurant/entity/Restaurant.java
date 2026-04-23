@@ -46,7 +46,7 @@ public class Restaurant extends BaseUpdatableEntity
     private Category category;
 
     @Builder
-    public Restaurant(String name, String description, String address, String addressDetail, User user, Category category) {
+    protected Restaurant(String name, String description, String address, String addressDetail, User user, Category category) {
         this.name = name;
         this.description = description;
         this.address = address;

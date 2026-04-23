@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional(readOnly = true)
@@ -41,14 +42,14 @@ public class RestaurantServiceImpl implements RestaurantService
         Category category = categoryRepository.findById(createRestaurantRequest.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException(createRestaurantRequest.categoryId()));
 
-        Restaurant restaurant = new Restaurant(
-                createRestaurantRequest.name(),
-                createRestaurantRequest.description(),
-                createRestaurantRequest.address(),
-                createRestaurantRequest.addressDetail(),
-                user,
-                category
-        );
+        Restaurant restaurant = Restaurant.builder()
+                .name(createRestaurantRequest.name())
+                .description(createRestaurantRequest.description())
+                .address(createRestaurantRequest.address())
+                .addressDetail(createRestaurantRequest.addressDetail())
+                .user(user)
+                .category(category)
+                .build();
 
         restaurantRepository.save(restaurant);
         return restaurantMapper.toDto(restaurant);
@@ -61,10 +62,7 @@ public class RestaurantServiceImpl implements RestaurantService
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        // 본인 가게만 접근
-        if (!userId.equals(restaurant.getUser().getId())) {
-            throw new RestaurantAccessDeniedException(restaurantId);
-        }
+        validateOwner(userId, restaurantId, restaurant);
 
         Category category = categoryRepository.findById(updateRestaurantRequest.categoryId())
                         .orElseThrow(() -> new CategoryNotFoundException(updateRestaurantRequest.categoryId()));
@@ -87,11 +85,16 @@ public class RestaurantServiceImpl implements RestaurantService
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        // 본인 가게만 접근
-        if (!userId.equals(restaurant.getUser().getId())) {
-            throw new RestaurantAccessDeniedException(restaurantId);
-        }
+        validateOwner(userId, restaurantId, restaurant);
 
         restaurantRepository.delete(restaurant);
+    }
+
+    private void validateOwner(UUID userId, UUID restaurantId, Restaurant restaurant) {
+        User owner = restaurant.getUser();
+
+        if (owner == null || !Objects.equals(userId, owner.getId())) {
+            throw new RestaurantAccessDeniedException(restaurantId);
+        }
     }
 }
