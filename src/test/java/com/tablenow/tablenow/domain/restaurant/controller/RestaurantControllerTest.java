@@ -1,6 +1,7 @@
-package com.tablenow.tablenow.domain.restaurant;
+package com.tablenow.tablenow.domain.restaurant.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tablenow.tablenow.domain.restaurant.RestaurantController;
 import com.tablenow.tablenow.domain.restaurant.dto.entity.RestaurantDto;
 import com.tablenow.tablenow.domain.restaurant.dto.request.CreateRestaurantRequest;
 import com.tablenow.tablenow.domain.restaurant.dto.request.UpdateRestaurantRequest;
